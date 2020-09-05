@@ -1,14 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
-//import { getUser, logInUser } from "../../api/userApi";
+import { logInUser } from "../../api/userApi";
 
 let initialState = {
-  loginLoading: false,
+  loginIsLoading: false,
   userLoading: false,
   loggedIn: false,
   username: "",
   email: "",
   topScore: 0,
   totalActiveGames: 0,
+  error: null
 };
 
 const startLoading = (state) => {
@@ -70,3 +71,13 @@ export const {
 export default userSlice.reducer;
 
 //TODO make async thunk api calls
+export const logIn = (username, password) => async dispatch => {
+  dispatch(setLoginLoading())
+  const res = await logInUser(username, password);
+  console.log(res)
+  if (res.status === "ok") {
+    dispatch(setLoginSuccess());
+  } else {
+    dispatch(setFailure({error: res.error}))
+  }
+} 

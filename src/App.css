@@ -1,4 +1,9 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700');
+@import url('https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@100;300;400;900&family=Raleway&display=swap');
+
+html {
+  background-color: #c3c3c3;
+}
 
 #main-container {
   flex-grow: 1;
@@ -7,7 +12,7 @@
   overflow-y: hidden;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  background-color: #ffffff;
+  background-color: #c3c3c3;
   font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
