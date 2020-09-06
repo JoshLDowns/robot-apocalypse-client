@@ -1,11 +1,17 @@
-import React from "react";
-import { Link } from "@reach/router";
+import React, { useEffect, useCallback, useState } from "react";
+import { Link, navigate } from "@reach/router";
 
 import { useInput } from "../hooks/forms";
 
 import { useDispatch, useSelector } from "react-redux";
 
-import { logIn, clearUserErrors } from "../redux/slices/userSlice";
+import {
+  register,
+  clearUserErrors,
+  resetRegister,
+} from "../redux/slices/userSlice";
+
+import ConfirmRegister from "../components/ConfirmRegister";
 
 import TextField from "@material-ui/core/TextField";
 import Container from "@material-ui/core/Container";
@@ -23,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Login = () => {
+const Register = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const {
@@ -36,21 +42,47 @@ const Login = () => {
     bind: bindPassword,
     reset: resetPassword,
   } = useInput("");
+  const {
+    value: confirmPass,
+    bind: bindConfirmPass,
+    reset: resetConfirmPass,
+  } = useInput("");
+  const [registerModal, setRegisterModal] = useCallback(useState(false))
 
   const error = useSelector((state) => state.user.error);
   const loading = useSelector((state) => state.user.loginIsLoading);
+  const registered = useSelector((state) => state.user.registered);
 
   const handleSubmit = (evt) => {
     evt.preventDefault();
     const user = username;
     const pass = password;
+    const confPass = confirmPass;
     resetUserName();
     resetPassword();
-    dispatch(logIn(user, pass));
+    resetConfirmPass();
+    dispatch(register(user, pass, confPass));
   };
+
+  const handleRegisterClose = useCallback(() => {
+    setRegisterModal(false)
+    navigate("/login")
+  }, [setRegisterModal])
+
+  useEffect(()=>{
+    if (registered) {
+      dispatch(resetRegister())
+      setRegisterModal(true)
+    }
+  }, [registered, dispatch, setRegisterModal])
 
   return (
     <>
+      <ConfirmRegister
+        username={username}
+        open={registerModal}
+        handleClose={handleRegisterClose}
+      />
       <Container className={classes.mainWrapper}>
         <div
           style={{
@@ -90,7 +122,6 @@ const Login = () => {
                 name="username"
                 autoFocus
                 autoComplete="email"
-                helperText={error ? "Invalid username or password" : null}
                 error={error ? true : false}
                 {...bindUsername}
               />
@@ -103,11 +134,25 @@ const Login = () => {
                 label="Password"
                 type="password"
                 required
-                name="password"
+                name="passworde"
                 autoComplete="current-password"
-                helperText={error ? "Invalid username or password" : null}
                 error={error ? true : false}
                 {...bindPassword}
+              />
+              <br />
+              <TextField
+                fullWidth
+                size="small"
+                color="primary"
+                variant="outlined"
+                label="Confirm Password"
+                type="password"
+                required
+                name="confirmPassword"
+                autoComplete="current-password"
+                helperText={error ? error : null}
+                error={error ? true : false}
+                {...bindConfirmPass}
               />
               <br />
               <Button
@@ -120,18 +165,18 @@ const Login = () => {
                   handleSubmit(evt);
                 }}
               >
-                {loading ? <CircularProgress color="secondary" /> : "LOGIN"}
+                {loading ? <CircularProgress color="secondary" /> : "REGISTER"}
               </Button>
             </div>
           </form>
           <br />
           <Typography
             component={Link}
-            to="/register"
+            to="/login"
             onClick={() => dispatch(clearUserErrors())}
             className={classes.linkText}
           >
-            Don't have an account? Register here!
+            Already have an account? Login here!
           </Typography>
         </div>
       </Container>
@@ -139,4 +184,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

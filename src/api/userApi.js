@@ -6,27 +6,85 @@ const timeout = (ms) => {
 };
 
 export const logInUser = async (username, password) => {
-  const response = { status: "", error: null }
-  await timeout(1000)
+  const response = { status: "", error: null };
+  await timeout(1000);
   await axios
-    .post("/auth/login",
-      `grant_type=password&username=${username}&password=${password}&client_id=null&client_secret=null`
-    , {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Accept": "application/json",
+    .post(
+      "/auth/login",
+      `grant_type=password&username=${username}&password=${password}&client_id=null&client_secret=null`,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Accept: "application/json",
+        },
       }
-    })
+    )
     .then((res) => {
-      setAuthToken(res.data.access_token)
-      response.status = "ok"
+      setAuthToken(res.data.access_token);
+      response.status = "ok";
     })
     .catch((err) => {
-      console.log(err)
-      response.status = "error"
+      console.log(err);
+      response.status = "error";
       response.error = err.toString();
+    });
+  return response;
+};
+
+export const registerUser = async (username, password) => {
+  const response = { status: "", error: null };
+  await timeout(1000);
+  await axios.post(
+    "/auth/register",
+    `grant_type=password&username=${username}&password=${password}&client_id=null&client_secret=null`,
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
+      },
+    }
+  )
+  .then((res) => {
+    console.log(res)
+    if (res.data.message.includes("exists")) {
+      response.status = "error"
+      response.error = res.data.message
+    } else {
+      response.status = "ok"
+    }
+  })
+  .catch((err) => {
+    console.log(err);
+      response.status = "error";
+      response.error = err.toString();
+  })
+  return response;
+};
+
+export const getUser = async () => {
+  const response = { status: "", error: null, data: null }
+  await axios
+    .get("/auth/user", {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
+      },
     })
-    return response
+    .then((res) => {
+      if (typeof res.data.string === "string" && res.data.message.includes("wrong")) {
+        response.status = "error"
+        response.error = res.data.message
+      } else {
+        response.status = "ok"
+        response.data = res.data.message
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+        response.status = "error";
+        response.error = err.toString();
+    })
+    return response;
 }
 
 export const logoutUser = () => {
@@ -36,6 +94,6 @@ export const logoutUser = () => {
 
 const setAuthToken = (token) => {
   const authToken = `Bearer ${token}`;
-  localStorage.setItem("robot-apocalypse-user", JSON.stringify(token));
+  localStorage.setItem("robot-apocalypse-user", token);
   axios.defaults.headers.common["Authorization"] = authToken;
 };

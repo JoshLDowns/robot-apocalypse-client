@@ -25,6 +25,19 @@ export default {
     largeButton: {
       fontWeight: "900",
       fontSize: "1.5rem"
+    },
+    closeButton: {
+      position: "absolute",
+      top: "0",
+      right: "5px",
+    },
+    titleText: {
+      fontWeight: 900,
+      fontSize: "1.5rem"
+    },
+    linkText: {
+      color: "#c31445",
+      textDecoration: "none"
     }
   },
 };
