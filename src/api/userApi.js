@@ -34,35 +34,36 @@ export const logInUser = async (username, password) => {
 export const registerUser = async (username, password) => {
   const response = { status: "", error: null };
   await timeout(1000);
-  await axios.post(
-    "/auth/register",
-    `grant_type=password&username=${username}&password=${password}&client_id=null&client_secret=null`,
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Accept: "application/json",
-      },
-    }
-  )
-  .then((res) => {
-    console.log(res)
-    if (res.data.message.includes("exists")) {
-      response.status = "error"
-      response.error = res.data.message
-    } else {
-      response.status = "ok"
-    }
-  })
-  .catch((err) => {
-    console.log(err);
+  await axios
+    .post(
+      "/auth/register",
+      `grant_type=password&username=${username}&password=${password}&client_id=null&client_secret=null`,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Accept: "application/json",
+        },
+      }
+    )
+    .then((res) => {
+      console.log(res);
+      if (res.data.message.includes("exists")) {
+        response.status = "error";
+        response.error = res.data.message;
+      } else {
+        response.status = "ok";
+      }
+    })
+    .catch((err) => {
+      console.log(err);
       response.status = "error";
       response.error = err.toString();
-  })
+    });
   return response;
 };
 
 export const getUser = async () => {
-  const response = { status: "", error: null, data: null }
+  const response = { status: "", error: null, data: null };
   await axios
     .get("/auth/user", {
       headers: {
@@ -71,21 +72,46 @@ export const getUser = async () => {
       },
     })
     .then((res) => {
-      if (typeof res.data.string === "string" && res.data.message.includes("wrong")) {
-        response.status = "error"
-        response.error = res.data.message
+      if (
+        typeof res.data.string === "string" &&
+        res.data.message.includes("wrong")
+      ) {
+        response.status = "error";
+        response.error = res.data.message;
       } else {
-        response.status = "ok"
-        response.data = res.data.message
+        console.log(res.data.message);
+        response.status = "ok";
+        response.data = res.data.message;
       }
     })
     .catch((err) => {
       console.log(err);
-        response.status = "error";
-        response.error = err.toString();
+      response.status = "error";
+      response.error = err.toString();
+    });
+  return response;
+};
+
+export const patchUser = async (id, field, value) => {
+  const response = { status: "", error: null };
+  await axios
+    .patch("/auth/user/update", `id=${id}&field=${field}&value=${value}`, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
+      },
     })
-    return response;
-}
+    .then((res) => {
+      console.log(res);
+      response.status = "ok";
+    })
+    .catch((err) => {
+      console.log(err);
+      response.status = "error";
+      response.error = err.toString();
+    });
+  return response
+};
 
 export const logoutUser = () => {
   localStorage.removeItem("robot-apocalypse-user");

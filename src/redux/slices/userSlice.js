@@ -1,11 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { logInUser, registerUser, getUser } from "../../api/userApi";
+import { logInUser, registerUser, getUser, patchUser } from "../../api/userApi";
 
 let initialState = {
   loginIsLoading: false,
   userLoading: false,
   loggedIn: false,
   registered: false,
+  userId: null,
   username: "",
   email: "",
   topScore: 0,
@@ -47,10 +48,11 @@ const userSlice = createSlice({
     getUserSuccess(state, action) {
       const { user } = action.payload;
       state.userLoading = false;
+      state.userId = user.id;
       state.username = user.username;
       state.email = user.email;
       state.topScore = user.top_score;
-      state.activeGames = user.active_games;
+      state.activeGame = user.active_game;
       state.loggedIn = true;
     },
     removeUser(state) {
@@ -61,6 +63,9 @@ const userSlice = createSlice({
       state.topScore = 0;
       state.activeGames = 0;
       state.loggedIn = false;
+    },
+    setActiveGame(state) {
+      state.activeGame = true
     },
     clearUserErrors(state) {
       state.error = null;
@@ -79,6 +84,7 @@ export const {
   setLoginSuccess,
   getUserSuccess,
   removeUser,
+  setActiveGame,
   clearUserErrors,
   resetRegister,
   setFailure,
@@ -115,9 +121,20 @@ export const register = (username, password, confirmPass) => async dispatch => {
 export const fetchUser = () => async dispatch => {
   dispatch(setIsLoading());
   const user = await getUser();
+  console.log(user)
   if (user.status === "ok") {
     dispatch(getUserSuccess({user: user.data}))
   } else {
     dispatch(setFailure({error: user.error}))
+  }
+}
+
+export const setGameActive = (id) => async dispatch => {
+  const res = await patchUser(id, "active_game", true);
+  console.log(res)
+  if (res.status === "ok") {
+    dispatch(setActiveGame())
+  } else {
+    dispatch(setFailure({error: res.error}))
   }
 }

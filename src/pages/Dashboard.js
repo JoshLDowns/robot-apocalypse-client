@@ -1,11 +1,17 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+
+import { createNewGame, getCurrentGame } from "../redux/slices/gameSlice";
+import { setGameActive } from "../redux/slices/userSlice";
+
+import NewGame from "../components/NewGame";
 
 import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -19,16 +25,54 @@ const useStyles = makeStyles((theme) => ({
 
 const Dashboard = () => {
   const classes = useStyles();
+  const dispatch = useDispatch();
 
-  const username = useSelector((state) => state.user.username);
+  const isLoading = useSelector((state) => state.game.isLoading);
+  const gameId = useSelector((state) => state.game.gameId);
+
+  const userId = useSelector((state) => state.user.userId);
+  const activeGame = useSelector((state) => state.user.activeGame);
+
+  const handleNewGame = (userId, difficulty) => {
+    dispatch(createNewGame(userId, difficulty))
+    dispatch(setGameActive(userId))
+  }
+
+  useEffect(()=>{
+    if (activeGame && !gameId) {
+      dispatch(getCurrentGame(userId))
+    }
+  },[activeGame, gameId, userId, dispatch])
 
   return (
     <>
       <Container className={classes.mainWrapper}>
         <br />
-        <Typography className={classes.welcomeText}>
-          {`Welcome back ${username}!`}
-        </Typography>
+        <Grid container spacing={6}>
+            {isLoading && (
+              <Grid item xs={12}>
+              <CircularProgress color="primary" />
+            </Grid>)}
+            {!isLoading && (
+              <Grid item xs={12}>
+                {activeGame ? (
+                  <Typography>Continue?</Typography>
+                ) : (
+                  <NewGame handleNewGame={handleNewGame} userId={userId} />
+                )}
+              </Grid>
+            )}
+          <Grid item sm={6} xs={12}>
+            <Typography className={classes.titleText}>
+              Player Stats
+            </Typography>
+          </Grid>
+          <Grid item sm={6} xs={12} >
+          <Typography className={classes.titleText}>
+              Leaderboard
+            </Typography>
+          </Grid>
+        </Grid>
       </Container>
     </>
   )
