@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { newGame, getGame } from "../../api/gameApi";
+import { buildNewGameRooms, getCurrentRooms } from "./roomSlice";
 
 let initialState = {
   gameLoading: false,
@@ -69,8 +70,8 @@ export default gameSlice.reducer;
 export const createNewGame = (userId, difficulty) => async (dispatch) => {
   dispatch(setIsLoading);
   const game = await newGame(userId, difficulty);
-  console.log(game);
   if (game.status === "ok") {
+    dispatch(buildNewGameRooms(userId, game.data.id, difficulty))
     dispatch(getGameSuccess({ game: game.data }));
   } else {
     dispatch(setFailure({ error: game.error }));
@@ -80,8 +81,8 @@ export const createNewGame = (userId, difficulty) => async (dispatch) => {
 export const getCurrentGame = (userId) => async (dispatch) => {
   dispatch(setIsLoading);
   const game = await getGame(userId);
-  console.log(game);
   if (game.status === "ok") {
+    dispatch(getCurrentRooms(game.data.id, game.data["current_room"]))
     dispatch(getGameSuccess({ game: game.data }));
   } else {
     dispatch(setFailure({ error: game.error }));
